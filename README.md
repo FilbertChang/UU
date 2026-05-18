@@ -74,7 +74,7 @@ Phase 1 is built in stages:
 - [x] **Stage 1** — Project skeleton + Docker, `/health` endpoint
 - [x] **Stage 2** — PDF ingestion pipeline (`/documents/*`)
 - [x] **Stage 3** — Embedding + retrieval (pgvector cosine + reranker)
-- [ ] **Stage 4** — Chat endpoint with citations
-- [ ] **Stage 5** — Citation verifier
+- [x] **Stage 4** — Chat endpoint with citations (`/chat/*`)
+- [x] **Stage 5** — Citation verifier (existence + text-support + claim-grounding)
 - [ ] **Stage 6** — Frontend
 - [ ] **Stage 7** — LangSmith tracing

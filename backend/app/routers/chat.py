@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 from backend.app.config import settings
 from backend.app.database import get_db
 from backend.app.models.models import ChatMessage, ChatSession
-from backend.app.services import generation, retrieval
+from backend.app.services import citation_verifier, generation, retrieval
 from backend.app.services.llm import LLMError, get_provider
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -62,12 +63,13 @@ def ask(payload: AskRequest, db: Session = Depends(get_db)):
     except LLMError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    citations = generation.extract_citations(answer, chunks)
+    verification = citation_verifier.verify(db, answer, chunks)
+    citations = [asdict(c) for c in verification.citations]
 
-    retrieval_conf = sum(c.score for c in chunks) / len(chunks) if chunks else 0.0
-    # Provisional confidence — the verified-citation component is added in Stage 5.
-    # Answers that cite nothing from the retrieved context are penalized.
-    confidence = round(retrieval_conf if citations else retrieval_conf * 0.4, 3)
+    retrieval_score = sum(c.score for c in chunks) / len(chunks) if chunks else 0.0
+    confidence = citation_verifier.compute_confidence(
+        retrieval_score, verification.verified_ratio, verification.grounding_ratio
+    )
 
     db.add(ChatMessage(session_id=session.id, role="user", content=question))
     db.add(
@@ -86,6 +88,12 @@ def ask(payload: AskRequest, db: Session = Depends(get_db)):
         "answer": answer,
         "citations": citations,
         "confidence": confidence,
+        "verification": {
+            "verified_ratio": verification.verified_ratio,
+            "grounding_ratio": verification.grounding_ratio,
+            "unsupported_claims": verification.unsupported_claims,
+            "notes": verification.notes,
+        },
         "disclaimer": generation.DISCLAIMER,
     }
 

@@ -34,5 +34,13 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 120.0
     conversation_memory_turns: int = 4
 
+    # A grounded citation counts as "verified" when this fraction of the cited
+    # Pasal's content words also appear in the answer.
+    citation_support_threshold: float = 0.4
+
+    # A sentence of the answer counts as "grounded" when this fraction of its
+    # content words appear in some retrieved context chunk.
+    claim_grounding_threshold: float = 0.5
+
 
 settings = Settings()

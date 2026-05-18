@@ -1,11 +1,9 @@
-"""Prompt construction, LLM answer generation, and citation extraction.
+"""Prompt construction and LLM answer generation.
 
 The system prompt enforces the anti-hallucination rules: answer only from the
 supplied context, always cite a Pasal, admit when the answer is not in the
 context, and refuse case-specific advice.
 """
-
-import re
 
 from backend.app.services.llm import LLMProvider
 from backend.app.services.retrieval import RetrievedChunk
@@ -30,8 +28,6 @@ Aturan wajib:
 _REWRITE_SYSTEM = """Anda menulis ulang pertanyaan lanjutan menjadi satu pertanyaan yang
 berdiri sendiri dan dapat dipahami tanpa melihat riwayat percakapan. Keluarkan HANYA
 pertanyaan hasil tulis ulang, tanpa penjelasan apa pun."""
-
-_PASAL_PATTERN = re.compile(r"Pasal\s+(\d+[A-Za-z]?)", re.IGNORECASE)
 
 
 def _citation_label(chunk: RetrievedChunk) -> str:
@@ -79,25 +75,3 @@ def generate_answer(
         parts.append(f"RIWAYAT PERCAKAPAN:\n{_format_history(history)}")
     parts.append(f"PERTANYAAN: {question}")
     return provider.complete(_SYSTEM_PROMPT, "\n\n".join(parts)).strip()
-
-
-def extract_citations(answer: str, chunks: list[RetrievedChunk]) -> list[dict]:
-    """Return the context chunks whose Pasal number is referenced in the answer."""
-    mentioned = {m.group(1).lower() for m in _PASAL_PATTERN.finditer(answer)}
-    citations: list[dict] = []
-    seen: set[int] = set()
-    for chunk in chunks:
-        if chunk.pasal.lower() in mentioned and chunk.chunk_id not in seen:
-            seen.add(chunk.chunk_id)
-            citations.append(
-                {
-                    "chunk_id": chunk.chunk_id,
-                    "pasal": chunk.pasal,
-                    "label": _citation_label(chunk),
-                    "short_name": chunk.short_name,
-                    "law_name": chunk.law_name,
-                    "is_penjelasan": chunk.is_penjelasan,
-                    "text": chunk.text,
-                }
-            )
-    return citations

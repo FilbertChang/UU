@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# local AI assistant guidance — not for the shared repo
+CLAUDE.md

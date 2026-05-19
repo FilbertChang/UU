@@ -29,6 +29,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app/backend
+      - ./frontend:/app/frontend
       - hf_cache:/hf_cache
     command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 

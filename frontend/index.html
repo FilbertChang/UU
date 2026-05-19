@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Indo Legal AI</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <header>
+    <h1>Indo Legal AI</h1>
+    <p>Asisten hukum Indonesia berbasis RAG — setiap jawaban disertai sitasi yang diverifikasi.</p>
+  </header>
+
+  <nav>
+    <button data-tab="chat" class="active">Tanya Jawab</button>
+    <button data-tab="documents">Dokumen</button>
+    <button data-tab="stats">Statistik</button>
+  </nav>
+
+  <main>
+    <section id="chat" class="tab active">
+      <div id="chat-hint">
+        <p>Ajukan <strong>pertanyaan spesifik</strong> tentang isi dokumen hukum yang
+        sudah diunggah. Pertanyaan luas seperti "apa isi UU ini" akan berkeyakinan
+        rendah &mdash; ringkasan seluruh dokumen di luar cakupan Phase 1.</p>
+        <div class="examples">
+          <button type="button" class="example">Apa saja hak konsumen?</button>
+          <button type="button" class="example">Apa kewajiban pelaku usaha?</button>
+          <button type="button" class="example">Apa sanksi pidana bagi pelaku usaha yang melanggar?</button>
+          <button type="button" class="example">Apa tujuan perlindungan konsumen?</button>
+        </div>
+      </div>
+      <div id="messages"></div>
+      <div class="composer">
+        <textarea id="question" rows="2"
+          placeholder="Tanyakan sesuatu tentang hukum Indonesia..."></textarea>
+        <button id="send">Kirim</button>
+      </div>
+    </section>
+
+    <section id="documents" class="tab">
+      <form id="upload-form">
+        <h3>Unggah Dokumen Hukum (PDF)</h3>
+        <input type="file" id="file" accept="application/pdf" required />
+        <input type="text" id="short_name" placeholder="Nama singkat (mis. UU 8/1999)" required />
+        <input type="text" id="law_name" placeholder="Nama lengkap dokumen" required />
+        <input type="text" id="law_type" placeholder="Jenis (UU / PP / KUHP)" required />
+        <input type="text" id="law_number" placeholder="Nomor (opsional)" />
+        <input type="number" id="law_year" placeholder="Tahun (opsional)" />
+        <button type="submit">Unggah</button>
+      </form>
+      <div id="doc-list"></div>
+    </section>
+
+    <section id="stats" class="tab">
+      <div id="stat-cards"></div>
+      <div class="chart-wrap"><canvas id="type-chart"></canvas></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

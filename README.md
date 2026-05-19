@@ -76,5 +76,5 @@ Phase 1 is built in stages:
 - [x] **Stage 3** — Embedding + retrieval (pgvector cosine + reranker)
 - [x] **Stage 4** — Chat endpoint with citations (`/chat/*`)
 - [x] **Stage 5** — Citation verifier (existence + text-support + claim-grounding)
-- [ ] **Stage 6** — Frontend
+- [x] **Stage 6** — Frontend (chat UI + documents + stats dashboard)
 - [ ] **Stage 7** — LangSmith tracing

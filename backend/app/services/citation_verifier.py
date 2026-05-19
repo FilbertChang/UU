@@ -20,6 +20,7 @@ Confidence = (0.5 * retrieval similarity + 0.5 * verified-citation ratio)
 import re
 from dataclasses import dataclass
 
+from langsmith import traceable
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -110,6 +111,7 @@ def _claim_grounding(
     return ratio, unsupported
 
 
+@traceable
 def verify(
     db: Session, answer: str, chunks: list[RetrievedChunk]
 ) -> VerificationResult:

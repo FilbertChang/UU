@@ -2,6 +2,7 @@ import uuid
 from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, HTTPException
+from langsmith import traceable
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -33,6 +34,23 @@ def _load_history(db: Session, session_id: str) -> list[tuple[str, str]]:
     return [(m.role, m.content) for m in reversed(messages)]
 
 
+@traceable(name="chat_pipeline")
+def _run_pipeline(
+    db: Session,
+    question: str,
+    history: list[tuple[str, str]],
+    short_name: str | None,
+    law_type: str | None,
+):
+    """Retrieval -> generation -> verification, traced as one nested unit."""
+    provider = get_provider()
+    search_query = generation.rewrite_query(provider, history, question)
+    chunks = retrieval.search(db, search_query, short_name=short_name, law_type=law_type)
+    answer = generation.generate_answer(provider, question, chunks, history)
+    verification = citation_verifier.verify(db, answer, chunks)
+    return chunks, answer, verification
+
+
 @router.post("/ask")
 def ask(payload: AskRequest, db: Session = Depends(get_db)):
     question = payload.question.strip()
@@ -51,19 +69,12 @@ def ask(payload: AskRequest, db: Session = Depends(get_db)):
     history = _load_history(db, session.id)
 
     try:
-        provider = get_provider()
-        search_query = generation.rewrite_query(provider, history, question)
-        chunks = retrieval.search(
-            db,
-            search_query,
-            short_name=payload.short_name,
-            law_type=payload.law_type,
+        chunks, answer, verification = _run_pipeline(
+            db, question, history, payload.short_name, payload.law_type
         )
-        answer = generation.generate_answer(provider, question, chunks, history)
     except LLMError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    verification = citation_verifier.verify(db, answer, chunks)
     citations = [asdict(c) for c in verification.citations]
 
     retrieval_score = sum(c.score for c in chunks) / len(chunks) if chunks else 0.0

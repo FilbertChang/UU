@@ -5,6 +5,8 @@ supplied context, always cite a Pasal, admit when the answer is not in the
 context, and refuse case-specific advice.
 """
 
+from langsmith import traceable
+
 from backend.app.services.llm import LLMProvider
 from backend.app.services.retrieval import RetrievedChunk
 
@@ -47,6 +49,7 @@ def _format_history(history: list[tuple[str, str]]) -> str:
     return "\n".join(f"{speakers.get(role, role)}: {content}" for role, content in history)
 
 
+@traceable
 def rewrite_query(
     provider: LLMProvider, history: list[tuple[str, str]], question: str
 ) -> str:
@@ -63,6 +66,7 @@ def rewrite_query(
     return first_line.strip() or question
 
 
+@traceable
 def generate_answer(
     provider: LLMProvider,
     question: str,

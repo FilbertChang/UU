@@ -8,6 +8,7 @@ keep the best `top_k`.
 from dataclasses import dataclass
 from functools import lru_cache
 
+from langsmith import traceable
 from sentence_transformers import CrossEncoder
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -36,6 +37,7 @@ def _reranker() -> CrossEncoder:
     return CrossEncoder(settings.reranker_model)
 
 
+@traceable
 def search(
     db: Session,
     query: str,

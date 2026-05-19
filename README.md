@@ -77,4 +77,7 @@ Phase 1 is built in stages:
 - [x] **Stage 4** — Chat endpoint with citations (`/chat/*`)
 - [x] **Stage 5** — Citation verifier (existence + text-support + claim-grounding)
 - [x] **Stage 6** — Frontend (chat UI + documents + stats dashboard)
-- [ ] **Stage 7** — LangSmith tracing
+- [x] **Stage 7** — LangSmith tracing (`@traceable` across the chat pipeline)
+
+**Phase 1 complete.** All seven stages done — RAG Q&A over Indonesian legislation
+with verified citations.

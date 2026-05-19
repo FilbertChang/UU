@@ -5,6 +5,7 @@ The active provider is chosen by `settings.llm_provider`.
 """
 
 import httpx
+from langsmith import traceable
 
 from backend.app.config import settings
 
@@ -23,6 +24,7 @@ class LLMProvider:
 class OllamaProvider(LLMProvider):
     name = "ollama"
 
+    @traceable(run_type="llm")
     def complete(self, system: str, user: str) -> str:
         try:
             response = httpx.post(
@@ -46,6 +48,7 @@ class OllamaProvider(LLMProvider):
 class OpenAIProvider(LLMProvider):
     name = "openai"
 
+    @traceable(run_type="llm")
     def complete(self, system: str, user: str) -> str:
         try:
             response = httpx.post(
